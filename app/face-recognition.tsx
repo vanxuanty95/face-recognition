@@ -6,6 +6,8 @@ const FaceRecognitionScreen = () => {
     <View style={styles.container}>
       <Text style={styles.title}>Face Recognition Screen</Text>
       {/* Face Recognition Component will go here */}
+      <Text>Camera View Placeholder</Text>
+      {/* Add Camera component here */}
     </View>
   );
 };

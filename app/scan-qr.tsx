@@ -60,7 +60,7 @@ const ScanQrScreen = () => {
             [
                 {
                     text: 'Check In',
-                    onPress: () => router.push('/face-recognition'),
+                    onPress: () => router.push('./face-recognition'),
                 },
                 {text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
             ],
