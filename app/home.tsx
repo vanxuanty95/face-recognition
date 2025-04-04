@@ -1,14 +1,17 @@
 import React from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import ClassList from '../components/ClassList';
+import ScanButton from '../components/ScanButton';
 
-const LoginScreen = () => {
+const HomeScreen = () => {
   const router = useRouter();
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login Screen</Text>
-      <Button title="Login" onPress={() => router.push('/home')} />
+      <Text style={styles.title}>Home Screen</Text>
+      <ClassList />
+      <ScanButton />
     </View>
   );
 };
@@ -26,4 +29,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen;
+export default HomeScreen;
