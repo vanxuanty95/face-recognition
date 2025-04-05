@@ -37,7 +37,7 @@ const CheckinSuccessScreen = () => {
                 ]}
             >
                 <View style={styles.iconContainer}>
-                    <Ionicons name="checkmark-circle-outline" size={150} color="#8A2BE2"/>
+                    <Ionicons name="checkmark-circle-outline" size={150} color="#3B5998"/>
                 </View>
                 <Text style={styles.title}>Check-in Success!</Text>
                 <TouchableOpacity
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     button: {
-        backgroundColor: '#8A2BE2',
+        backgroundColor: '#3B5998',
         paddingVertical: 15,
         paddingHorizontal: 30,
         borderRadius: 25,

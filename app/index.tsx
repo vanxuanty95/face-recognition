@@ -1,57 +1,83 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    StyleSheet,
-    Animated,
-    Easing,
-    Dimensions,
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import React, {useState, useEffect, useRef} from 'react';
+import {View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, Dimensions} from 'react-native';
+import {useRouter} from 'expo-router';
+import {LinearGradient} from 'expo-linear-gradient';
+import {Ionicons} from '@expo/vector-icons';
 
-const { width } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
+
+class Star extends React.Component<{ size: any, top: any, left: any }> {
+    render() {
+        let {size, top, left} = this.props;
+        return (
+            <View style={[styles.star, {width: size, height: size, top, left}]}/>
+        );
+    }
+}
+
+const StarBackground = () => {
+    const stars = [];
+    const starCount = 100;
+
+    for (let i = 0; i < starCount; i++) {
+        const size = Math.random() * 3 + 1;
+        const top = Math.random() * height;
+        const left = Math.random() * width;
+        stars.push(<Star key={i} size={size} top={top} left={left}/>);
+    }
+
+    return <View style={styles.starContainer}>{stars}</View>;
+};
 
 const LoginScreen = () => {
     const router = useRouter();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-
     const fadeAnim = useRef(new Animated.Value(0)).current;
-    const scaleAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-        Animated.parallel([
-            Animated.timing(fadeAnim, {
-                toValue: 1,
-                duration: 1000,
-                useNativeDriver: true,
-            }),
-            Animated.spring(scaleAnim, {
-                toValue: 1,
-                friction: 4,
-                useNativeDriver: true,
-            }),
-        ]).start();
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+        }).start();
     }, []);
 
     const handleLogin = () => {
         // Implement login logic here
         console.log('Logging in with:', username, password);
-        router.push('./home');
+        router.replace('/home');
     };
 
     return (
-        <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-            <Animated.View style={[styles.formContainer, { transform: [{ scale: scaleAnim }] }]}>
-                <Animated.Text style={styles.title}>Welcome Back</Animated.Text>
+        <View style={styles.container}>
+            <LinearGradient
+                colors={['#000000', '#000033']}
+                style={StyleSheet.absoluteFillObject}
+            />
+            <StarBackground/>
+            <Animated.View
+                style={[
+                    styles.formContainer,
+                    {
+                        opacity: fadeAnim,
+                        transform: [
+                            {
+                                translateY: fadeAnim.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: [50, 0],
+                                }),
+                            },
+                        ],
+                    },
+                ]}
+            >
+                <Text style={styles.title}>Who's Here</Text>
                 <Text style={styles.subtitle}>Please sign in to your account</Text>
 
                 <View style={styles.inputContainer}>
-                    <Ionicons name="person-outline" size={20} color="#666" style={styles.inputIcon} />
+                    <Ionicons name="person-outline" size={20} color="#666" style={styles.inputIcon}/>
                     <TextInput
                         style={styles.input}
                         placeholder="Username"
@@ -62,7 +88,7 @@ const LoginScreen = () => {
                 </View>
 
                 <View style={styles.inputContainer}>
-                    <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
+                    <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon}/>
                     <TextInput
                         style={styles.input}
                         placeholder="Password"
@@ -72,21 +98,13 @@ const LoginScreen = () => {
                         onChangeText={setPassword}
                     />
                     <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-                        <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={20} color="#666" />
+                        <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={20} color="#666"/>
                     </TouchableOpacity>
                 </View>
 
-                <View style={styles.rememberForgotContainer}>
-                    <View style={styles.rememberMeContainer}>
-                        <TouchableOpacity style={styles.checkbox}>
-                            {/* Add checkbox logic here */}
-                        </TouchableOpacity>
-                        <Text style={styles.rememberMeText}>Remember me</Text>
-                    </View>
-                    <TouchableOpacity>
-                        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-                    </TouchableOpacity>
-                </View>
+                <TouchableOpacity style={styles.forgotPassword}>
+                    <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+                </TouchableOpacity>
 
                 <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
                     <Text style={styles.loginButtonText}>Sign In</Text>
@@ -99,7 +117,7 @@ const LoginScreen = () => {
                     </TouchableOpacity>
                 </View>
             </Animated.View>
-        </Animated.View>
+        </View>
     );
 };
 
@@ -108,25 +126,24 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#8A2BE2', // Deep purple background
+    },
+    starContainer: {
+        ...StyleSheet.absoluteFillObject,
+    },
+    star: {
+        position: 'absolute',
+        backgroundColor: 'white',
+        borderRadius: 50,
     },
     formContainer: {
         width: width * 0.9,
-        backgroundColor: 'white',
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
         borderRadius: 20,
         padding: 20,
         alignItems: 'center',
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
     },
     title: {
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: 'bold',
         color: '#333',
         marginBottom: 10,
@@ -134,7 +151,7 @@ const styles = StyleSheet.create({
     subtitle: {
         fontSize: 16,
         color: '#666',
-        marginBottom: 20,
+        marginBottom: 30,
     },
     inputContainer: {
         flexDirection: 'row',
@@ -144,6 +161,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         marginBottom: 15,
         paddingHorizontal: 10,
+        backgroundColor: 'white',
     },
     input: {
         flex: 1,
@@ -156,33 +174,15 @@ const styles = StyleSheet.create({
     eyeIcon: {
         padding: 10,
     },
-    rememberForgotContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        width: '100%',
+    forgotPassword: {
+        alignSelf: 'flex-end',
         marginBottom: 20,
     },
-    rememberMeContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    checkbox: {
-        width: 20,
-        height: 20,
-        borderWidth: 1,
-        borderColor: '#8A2BE2',
-        borderRadius: 4,
-        marginRight: 10,
-    },
-    rememberMeText: {
-        color: '#666',
-    },
     forgotPasswordText: {
-        color: '#8A2BE2',
+        color: '#3b5998',
     },
     loginButton: {
-        backgroundColor: '#8A2BE2',
+        backgroundColor: '#3b5998',
         paddingVertical: 15,
         paddingHorizontal: 30,
         borderRadius: 25,
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
         color: '#666',
     },
     signupLink: {
-        color: '#8A2BE2',
+        color: '#3b5998',
         fontWeight: 'bold',
     },
 });

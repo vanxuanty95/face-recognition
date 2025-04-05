@@ -46,7 +46,7 @@ const FaceRecognitionScreen = () => {
             />
             <Animated.View style={[styles.overlay, {opacity: fadeAnim}]}>
                 <View style={styles.faceOutline}>
-                    <Ionicons name="person-outline" size={150} color="#8A2BE2"/>
+                    <Ionicons name="person-outline" size={150} color="#3B5998"/>
                 </View>
                 <Text style={styles.instructionText}>
                     Position your face within the outline
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
         width: 250,
         height: 250,
         borderWidth: 2,
-        borderColor: '#8A2BE2',
+        borderColor: '#3B5998',
         borderRadius: 125,
         backgroundColor: 'transparent',
         justifyContent: 'center',
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
         width: 70,
         height: 70,
         borderRadius: 35,
-        backgroundColor: '#8A2BE2',
+        backgroundColor: '#3B5998',
         justifyContent: 'center',
         alignItems: 'center',
     },

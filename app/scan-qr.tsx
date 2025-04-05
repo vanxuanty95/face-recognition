@@ -4,8 +4,6 @@ import {Camera, useCameraDevice, useCodeScanner} from "react-native-vision-camer
 import {useRouter} from 'expo-router';
 import {Ionicons} from '@expo/vector-icons';
 
-const {width, height} = Dimensions.get('window');
-
 const ScanQrScreen = () => {
     const router = useRouter();
     const [hasPermission, setHasPermission] = useState(false);
@@ -13,12 +11,12 @@ const ScanQrScreen = () => {
     const device = useCameraDevice("back");
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const scanLineAnim = useRef(new Animated.Value(0)).current;
-    const onReadRef = useRef(null);
+    const onReadRef = useRef<((data: string | null) => void) | null>(null);
 
-    const onRead = useCallback((data) => {
+    const onRead = useCallback((data: string | null) => {
         Alert.alert(
             'QR Code Scanned!',
-            data,
+            data || 'No data',
             [
                 {
                     text: 'Check In',
@@ -37,10 +35,10 @@ const ScanQrScreen = () => {
     const codeScanner = useCodeScanner({
         codeTypes: ["qr"],
         onCodeScanned: (codes) => {
-            if (active) {
+            if (active && codes.length > 0) {
                 setActive(false);
                 console.log(`onCodeScanned value`, codes[0].value);
-                onReadRef.current(codes[0].value);
+                onReadRef.current?.(codes[0].value?codes[0].value:'');
             }
         },
     });
@@ -77,9 +75,7 @@ const ScanQrScreen = () => {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            if (onReadRef.current) {
-                onReadRef.current(null);
-            }
+            onReadRef.current?.(null);
         }, 15 * 1000);
         return () => clearTimeout(timer);
     }, []);
@@ -134,6 +130,7 @@ const ScanQrScreen = () => {
     );
 };
 
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -150,7 +147,7 @@ const styles = StyleSheet.create({
         width: 250,
         height: 250,
         borderWidth: 2,
-        borderColor: '#8A2BE2',
+        borderColor: '#3B5998',
         backgroundColor: 'transparent',
         justifyContent: 'center',
         alignItems: 'center',
@@ -158,7 +155,7 @@ const styles = StyleSheet.create({
     scanLine: {
         width: 230,
         height: 2,
-        backgroundColor: '#8A2BE2',
+        backgroundColor: '#3B5998',
         position: 'absolute',
         top: 0,
     },
