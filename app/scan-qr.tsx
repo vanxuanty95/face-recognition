@@ -1,72 +1,98 @@
-import React, {useState, useEffect} from "react";
-import {View, StyleSheet, Alert, Text} from 'react-native';
-import {
-    Camera,
-    useCameraDevice,
-    useCodeScanner,
-} from "react-native-vision-camera";
+import React, {useState, useEffect, useRef, useCallback} from "react";
+import {View, StyleSheet, Alert, Text, TouchableOpacity, Animated, Dimensions} from 'react-native';
+import {Camera, useCameraDevice, useCodeScanner} from "react-native-vision-camera";
 import {useRouter} from 'expo-router';
+import {Ionicons} from '@expo/vector-icons';
+
+const {width, height} = Dimensions.get('window');
 
 const ScanQrScreen = () => {
     const router = useRouter();
-
     const [hasPermission, setHasPermission] = useState(false);
-    const [refresh, setRefresh] = useState(false);
     const [active, setActive] = useState(true);
     const device = useCameraDevice("back");
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const scanLineAnim = useRef(new Animated.Value(0)).current;
+    const onReadRef = useRef(null);
+
+    const onRead = useCallback((data) => {
+        Alert.alert(
+            'QR Code Scanned!',
+            data,
+            [
+                {
+                    text: 'Check In',
+                    onPress: () => router.push('./face-recognition'),
+                },
+                {text: 'Cancel', onPress: () => setActive(true), style: 'cancel'},
+            ],
+            {cancelable: false}
+        );
+    }, [router]);
+
+    useEffect(() => {
+        onReadRef.current = onRead;
+    }, [onRead]);
+
     const codeScanner = useCodeScanner({
         codeTypes: ["qr"],
         onCodeScanned: (codes) => {
             if (active) {
                 setActive(false);
                 console.log(`onCodeScanned value`, codes[0].value);
-                onRead(codes[0].value);
+                onReadRef.current(codes[0].value);
             }
         },
     });
 
     useEffect(() => {
-        // exception case
-        setRefresh(!refresh);
-    }, [device, hasPermission]);
-
-    useEffect(() => {
         const requestCameraPermission = async () => {
             const permission = await Camera.requestCameraPermission();
-            console.log("Camera.requestCameraPermission ", permission);
             setHasPermission(permission === "granted");
         };
 
         requestCameraPermission();
 
-        //if it is idle for 15 secs, it will be closed
-        setTimeout(() => onRead(null), 15 * 1000);
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+        }).start();
+
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(scanLineAnim, {
+                    toValue: 1,
+                    duration: 2000,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(scanLineAnim, {
+                    toValue: 0,
+                    duration: 2000,
+                    useNativeDriver: true,
+                }),
+            ])
+        ).start();
+    }, []);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (onReadRef.current) {
+                onReadRef.current(null);
+            }
+        }, 15 * 1000);
+        return () => clearTimeout(timer);
     }, []);
 
     if (device == null || !hasPermission) {
         return (
-            <View style={styles.page2}>
-                <Text style={{backgroundColor: "white"}}>
+            <View style={styles.container}>
+                <Text style={styles.errorText}>
                     Camera not available or not permitted
                 </Text>
             </View>
         );
     }
-
-    const onRead = (e: any) => {
-        Alert.alert(
-            'QR Code Scanned!',
-            e.data,
-            [
-                {
-                    text: 'Check In',
-                    onPress: () => router.push('./face-recognition'),
-                },
-                {text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
-            ],
-            {cancelable: false}
-        );
-    };
 
     return (
         <View style={styles.container}>
@@ -76,6 +102,34 @@ const ScanQrScreen = () => {
                 device={device}
                 isActive={active}
             />
+            <Animated.View style={[styles.overlay, {opacity: fadeAnim}]}>
+                <View style={styles.scanArea}>
+                    <Animated.View
+                        style={[
+                            styles.scanLine,
+                            {
+                                transform: [
+                                    {
+                                        translateY: scanLineAnim.interpolate({
+                                            inputRange: [0, 1],
+                                            outputRange: [0, 246],
+                                        }),
+                                    },
+                                ],
+                            },
+                        ]}
+                    />
+                </View>
+                <Text style={styles.instructionText}>
+                    Position the QR code within the frame to scan
+                </Text>
+            </Animated.View>
+            <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => router.back()}
+            >
+                <Ionicons name="close" size={30} color="white"/>
+            </TouchableOpacity>
         </View>
     );
 };
@@ -84,45 +138,48 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: 'black',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    centerText: {
-        flex: 1,
+    overlay: {
+        ...StyleSheet.absoluteFillObject,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    scanArea: {
+        width: 250,
+        height: 250,
+        borderWidth: 2,
+        borderColor: '#8A2BE2',
+        backgroundColor: 'transparent',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    scanLine: {
+        width: 230,
+        height: 2,
+        backgroundColor: '#8A2BE2',
+        position: 'absolute',
+        top: 0,
+    },
+    instructionText: {
+        color: 'white',
+        fontSize: 16,
+        textAlign: 'center',
+        marginTop: 20,
+        paddingHorizontal: 40,
+    },
+    errorText: {
+        color: 'white',
         fontSize: 18,
-        padding: 32,
-        color: '#fff',
+        textAlign: 'center',
+        paddingHorizontal: 40,
     },
-    page2: {
-        flex: 1,
-        position: "absolute",
-        top: 0,
-        height: "100%",
-        width: "100%",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    backHeader: {
-        backgroundColor: "#00000090",
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        padding: "2%",
-        height: "5%",
-        width: "100%",
-        alignItems: "flex-start",
-        justifyContent: "center",
-    },
-    footer: {
-        backgroundColor: "#00000090",
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        padding: "10%",
-        height: "20%",
-        width: "100%",
-        alignItems: "center",
-        justifyContent: "center",
+    closeButton: {
+        position: 'absolute',
+        top: 40,
+        right: 20,
+        padding: 10,
     },
 });
 
