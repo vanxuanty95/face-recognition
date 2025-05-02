@@ -11,7 +11,7 @@ const ClassItem = ({name, code, time, isCheckin}: { name: any, code: any, time: 
         </View>
         <View style={styles.textContainer}>
             <Text style={styles.className}>{name}</Text>
-            <Text style={styles.classInfo}>code {code} • {time}</Text>
+            <Text style={styles.classInfo}>{code} • {time}</Text>
         </View>
         {isCheckin === true ? (
             <View style={styles.iconContainer}>

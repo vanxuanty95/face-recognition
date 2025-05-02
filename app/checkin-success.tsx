@@ -42,7 +42,7 @@ const CheckinSuccessScreen = () => {
                 <Text style={styles.title}>Check-in Success!</Text>
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() => router.dismissTo('/home')}
+                    onPress={() => router.replace('/home')} // Replace dismissTo with replace
                 >
                     <Text style={styles.buttonText}>Back to Home</Text>
                 </TouchableOpacity>

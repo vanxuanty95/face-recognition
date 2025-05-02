@@ -20,11 +20,18 @@ const ScanQrScreen = () => {
             [
                 {
                     text: 'Check In',
-                    onPress: () => router.push('./face-recognition'),
+                    onPress: () => {
+                        if (data) {
+                            router.push({
+                                pathname: './face-recognition',
+                                params: { qrData: data }, // Pass the scanned data as a query parameter
+                            });
+                        }
+                    },
                 },
-                {text: 'Cancel', onPress: () => setActive(true), style: 'cancel'},
+                { text: 'Cancel', onPress: () => setActive(true), style: 'cancel' },
             ],
-            {cancelable: false}
+            { cancelable: false }
         );
     }, [router]);
 
@@ -37,6 +44,7 @@ const ScanQrScreen = () => {
         onCodeScanned: (codes) => {
             if (active && codes.length > 0) {
                 setActive(false);
+                console.log(`onCodeScanned`, codes);
                 console.log(`onCodeScanned value`, codes[0].value);
                 onReadRef.current?.(codes[0].value?codes[0].value:'');
             }
@@ -76,7 +84,7 @@ const ScanQrScreen = () => {
     useEffect(() => {
         const timer = setTimeout(() => {
             onReadRef.current?.(null);
-        }, 15 * 1000);
+        }, 15 * 100000);
         return () => clearTimeout(timer);
     }, []);
 
